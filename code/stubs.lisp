@@ -3,7 +3,8 @@
 (defmacro define-stub (instruction-record-name)
   (with-accessors ((name instruction-record-name)
                    (argument-records instruction-record-argument-records)
-                   (result-records instruction-record-result-records))
+                   (result-records instruction-record-result-records)
+                   (one-arg-fn instruction-record-one-arg-fn))
       (find-instruction-record-by-name instruction-record-name)
     (let ((arguments (subseq *arguments* 0 (length argument-records)))
           (vop-name (vop-name name)))
@@ -23,7 +24,9 @@
                     if (fboundp type)
                       collect `(,type ,argument)
                     else
-                      collect `(coerce ,argument ',type))))))))
+                      collect `(coerce ,argument ',type))))
+         ,(when one-arg-fn
+            `(define-inline ,@one-arg-fn))))))
 
 (defmacro define-stubs ()
   `(progn

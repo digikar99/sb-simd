@@ -143,6 +143,9 @@
   ;; instruction emitting form that can be used as the :GENERATOR argument
   ;; of a VOP.
   (emitter nil :type function :read-only t)
+  ;; A list (name arguments &body body) that will be spliced into a
+  ;; (define-inline ...) form to generate the single-argument function.
+  (one-arg-fn nil :type list :read-only t)
   ;; Additional instruction properties, encoded as a bitfield.
   (bits nil :type instruction-record-bits :read-only t))
 
