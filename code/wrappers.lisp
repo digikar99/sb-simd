@@ -10,18 +10,17 @@
            (instruction-record-name-p two-arg-fn))
       `(progn
          (defun ,name (&rest args)
-           (if (null args)
-               ,neutral-element
-               (let ((result (,simd-type (first args))))
-                 (declare (,simd-type result))
-                 (loop for arg in (rest args)
-                       do (setf result (,two-arg-fn result arg)))
-                 result)))
+           (let ((acc ,neutral-element))
+             (declare (,simd-type acc))
+             (loop for arg in args do
+               (setf acc (,two-arg-fn acc (,simd-type arg))))
+             acc))
          (define-compiler-macro ,name (&rest args)
            (cond ((null args) ',neutral-element)
                  ((null (cdr args)) `(,',simd-type ,(first args)))
                  (t (reduce
-                     (lambda (a b) `(,',two-arg-fn ,a ,b))
+                     (lambda (a b)
+                       `(,',two-arg-fn (,',simd-type ,a) (,',simd-type ,b)))
                      args)))))
       `(defun ,name (&rest args)
          (declare (ignore args))
@@ -46,8 +45,7 @@
 (defmacro define-nary-wrapper* (name simd-type two-arg-fn one-arg-fn)
   (export name)
   (if (and (value-record-name-p simd-type)
-           (instruction-record-name-p two-arg-fn)
-           (instruction-record-name-p one-arg-fn))
+           (instruction-record-name-p two-arg-fn))
       `(progn
          (defun ,name (arg &rest more-args)
            (if (null more-args)
