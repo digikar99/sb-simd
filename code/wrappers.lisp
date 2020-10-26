@@ -57,10 +57,10 @@
                  acc)))
          (define-compiler-macro ,name (arg &rest more-args)
            (cond ((null more-args)
-                  `(,',one-arg-fn (,',simd-type ,(first args))))
+                  `(,',one-arg-fn (,',simd-type ,(first more-args))))
                  (t (reduce
-                     (lambda (a b) `(,',two-arg-fn a (,',simd-type ,b)))
-                     args
+                     (lambda (a b) `(,',two-arg-fn ,a (,',simd-type ,b)))
+                     more-args
                      :initial-value `(,',simd-type ,arg))))))
       `(defun ,name (arg &rest more-args)
          (declare (ignore arg more-args))
